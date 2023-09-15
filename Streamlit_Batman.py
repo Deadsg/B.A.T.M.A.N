@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # Set your OpenAI API key
-openai.api_key = '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'
+openai.api_key = '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'
 
 # Define the function to get ChatGPT response
 def get_gpt_response(user_input):
@@ -16,7 +16,7 @@ def get_gpt_response(user_input):
     return response.choices[0].text.strip()
 
 # Set the title of the app
-st.title("BATMANAI")
+st.title("B.A.T.M.A.N_A.I")
 
 # Initialize chat history
 chat_history = []
@@ -32,7 +32,4 @@ if st.button("Send"):
     chat_history.append(bot_message)
 
 # Display chat history
-st.text_area("Chat:", value="\n".join(chat_history), height=300)\
-
-
-
+st.text_area("Chat:", value="\n".join(chat_history), height=1000)
