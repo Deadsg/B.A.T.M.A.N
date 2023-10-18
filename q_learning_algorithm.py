@@ -1,3 +1,5 @@
+def QLearningEnvironment():
+
 class QLearningEnvironment:
     def __init__(self, n_states, n_actions, learning_rate, discount_factor):
         self.q_table = np.zeros((n_states, n_actions))
