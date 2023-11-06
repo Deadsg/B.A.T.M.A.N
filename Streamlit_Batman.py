@@ -1,15 +1,14 @@
 import streamlit as st
 import openai
 
-# Set your OpenAI API key
-openai.api_key = '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'
+openai.api_key = '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'
 
 # Define the function to get ChatGPT response
 def get_gpt_response(user_input):
     response = openai.Completion.create(
         engine="davinci",
         prompt=f"You: {user_input}\nAI:",
-        max_tokens=50,
+        max_tokens=75,
         n=1,
         stop=["\n"]
     )
@@ -28,8 +27,8 @@ if st.button("Send"):
     chat_history.append(user_message)
     
     gpt_response = get_gpt_response(user_input)
-    bot_message = f"Bot: {gpt_response}"
+    bot_message = f"B.A.T.M.A.N.A.I: {gpt_response}"
     chat_history.append(bot_message)
 
 # Display chat history
-st.text_area("Chat:", value="\n".join(chat_history), height=1000)
+st.text_area("Chat:", value="\n".join(chat_history), height=400000000)
