@@ -1,5 +1,7 @@
-def interpret_acronym(acronym, acronym_dict):
-    return acronym_dict.get(acronym.upper(), f"Acronym not found in the dictionary.")
+def interpret_acronym():
+
+    def interpret_acronym(acronym, acronym_dict):
+        return acronym_dict.get(acronym.upper(), f"Acronym not found in the dictionary.")
 
 # Define a dictionary of acronyms and their interpretations
 acronym_dict = {

@@ -49,3 +49,13 @@ if __name__ == "__main__":
     expander = ai_Expander(custom_acronym_formula)
     ai = expander.expand_acronym("ML")
     print(ai)
+
+def expand_acronym(acronym):
+  expanded_acronym = ""
+
+  for letter in acronym:
+    expanded_acronym += letter 
+
+  return expanded_acronym
+
+print(expand_acronym("BATMAN")) 
