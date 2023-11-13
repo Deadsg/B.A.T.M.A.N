@@ -6,12 +6,13 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import make_pipeline
 import gym
 import numpy as np
+import openai
 
 intents = discord.Intents.default()
 intents.typing = False
 intents.presences = False
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -40,6 +41,20 @@ SPAM_THRESHOLD = 5
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
+
+@bot.command()
+async def openai_chat(ctx, *, message):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": message}
+            ]
+        )
+        await ctx.send(response.choices[0].message['content'])
+    except Exception as e:
+        await ctx.send(f"An error occurred: {e}")
 
 @bot.command()
 async def hello(ctx):
@@ -120,4 +135,4 @@ async def analyze_sentiment(ctx, *, text):
     else:
         await ctx.send("Negative sentiment detected!")
 
-bot.run("MTE2NDIzNjYzNjIzNDcxOTM2Mg.Gx6AaN.wREasL_SJvs4UJk2p636eKs3jA-ws2g2YT1Yls")
+bot.run("MTE2NDIzNjYzNjIzNDcxOTM2Mg.GmL28w.lP23T1TbBW9yf4coZEfFHuQMWcgUtcWeMgP7IY")

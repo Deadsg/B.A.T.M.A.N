@@ -1,8 +1,3 @@
-import agi
-import cagi
-import Acronyminterpreter
-import ai_expander
-import Batman
 import openai
 import re
 import sys
@@ -10,16 +5,55 @@ import numpy as np
 
 openai.api_key = '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'
 
-def generate_response(prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150,
-        n=1,
-        stop=None,
-        temperature=0.6
-    )
-    return response.choices[0].text.strip()
+def acronym_interpreter(acronym):
+    
+    acronym_list = list(acronym)
+
+    expanded_acronym = []
+   
+    for letter in acronym_list:
+        
+        if letter == 'A':
+            expanded_acronym.append('Artificial Intelligence')
+        
+        elif letter == 'B':
+            expanded_acronym.append('Batman')
+        
+
+    # Join the expanded acronym into a string with spaces between each word
+    expanded_acronym = ' '.join(expanded_acronym)
+
+    return expanded_acronym
+
+def acronym_interpreter(acronym):
+    acronym_words = re.findall("[A-Z][a-z]*", acronym)
+    acronym_words = [word.title() for word in acronym_words]
+    return " ".join(acronym_words)
+
+print(acronym_interpreter("AI"))
+
+def generate_response():
+    print("BATMAN_AI CHATBOT INTERFACE.")
+    print("You can type 'quit' at any time to exit.")
+
+    while True:
+        user_input = input("User: ")
+        if user_input.lower() == 'quit':
+            print("Goodbye!")
+            break
+        else:
+            response = openai.ChatCompletion.create(
+              model="gpt-3.5-turbo",
+              messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": user_input},
+                ]
+            )
+            print("Bot: " + response['choices'][0]['message']['content'])
+
+if __name__ == "__main__":
+    generate_response()
+
 
 class AI_Agent:
     def __init__(self):
@@ -175,5 +209,3 @@ def q_learning_agent():
         predict = self.q_table[state, action]
         target = reward + self.gamma * np.max(self.q_table[next_state, :])
         self.q_table[state, action] = self.q_table[state, action] + self.alpha * (target - predict)
-
-

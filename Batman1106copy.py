@@ -1,6 +1,23 @@
-from openai import OpenAI
+import os
+from openai import Openai
+client = OpenAI()
 
-api_key = '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'
+openai.api_key = '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'
+
+def chat(message):
+    completion = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": message}
+        ]
+    )
+    print['choices'][0]['message']['content']
+
+while True:
+    message = input("User: ")
+    response = chat(message)
+    print("Assistant: ", response)
 
 class ChatBot:
     def __init__(self, api_key):
@@ -26,24 +43,3 @@ class ChatBot:
             if text is not None:
                 partial_message = partial_message + text
                 yield partial_message
-
-def main():
-    print("Chatbot: Hello! I am a CLI chatbot. You can start chatting with me. Type 'exit' to end the conversation.")
-
-    message_history = []
-    
-    while True:
-        user_input = input("You: ")
-
-        if user_input.lower() == 'exit':
-            print("Chatbot: Goodbye!")
-            break
-
-        response_generator = predict(user_input, message_history)
-        for bot_response in response_generator:
-            print("Bot:", bot_response)
-            message_history.append((user_input, bot_response))
-            break  # We only want the first response from the generator
-
-if __name__ == "__main__":
-    main()
