@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 # Get your OpenAI API key from environment variable
-api_key = os.getenv('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')
+api_key = os.getenv('')
 
 def predict(history, prompt):
     history_openai_format = []
