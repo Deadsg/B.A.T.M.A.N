@@ -42,15 +42,15 @@ seq2seq_model = tf.keras.Sequential([
     tf.keras.layers.Embedding(input_dim=128, output_dim=128, input_length=50),
     tf.keras.layers.LSTM(units=128, return_sequences=True),
     tf.keras.layers.LSTM(units=128),
-    tf.keras.layers.Dense(128, activation='softmax')  
+    tf.keras.layers.Dense(128, activation='softmax') 
 ])
-seq2seq_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+seq2seq_model.compile(
+    optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 # CLI Chatbot
 while True:
     user_input = input("You: ")
 
-    # Exit the chatbot if the user enters 'exit'
     if user_input.lower() == 'exit':
         print("Chatbot: Goodbye!")
         break
