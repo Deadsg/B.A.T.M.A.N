@@ -35,13 +35,11 @@ chat_data = {'inputs': [], 'responses': []}
 
 # Seq2Seq Model
 seq2seq_model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(input_dim=128, output_dim=128, input_length=50),  # Changed input_dim to 128
+    tf.keras.layers.Embedding(input_dim=128, output_dim=128, input_length=50),
     tf.keras.layers.LSTM(units=128, return_sequences=True),
     tf.keras.layers.LSTM(units=128),
-    tf.keras.layers.Dense(128, activation='softmax')  # Changed units to 128
+    tf.keras.layers.Dense(128, activation='softmax')  
 ])
-
-# Changed the loss function to 'sparse_categorical_crossentropy' since you're dealing with integer targets
 seq2seq_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 # CLI Chatbot
@@ -61,21 +59,18 @@ while True:
     else:
         # Perform actions based on user input
         if "predict" in user_input.lower():
-            # Use TensorFlow model for prediction
             sample_image = np.random.rand(28, 28)  # Replace with actual image data
             prediction = model.predict(np.expand_dims(sample_image, axis=0))
             predicted_class = np.argmax(prediction)
             print(f"Chatbot: TensorFlow Model predicts the digit: {predicted_class}")
         
         elif "train" in user_input.lower():
-            # Train the scikit-learn Decision Tree model (example)
             X_train_dt = np.random.rand(100, 10)  # Replace with actual training data
             y_train_dt = np.random.randint(2, size=100)  # Replace with actual labels
             dt_model.fit(X_train_dt, y_train_dt)
             print("Chatbot: scikit-learn Decision Tree model trained.")
         
         elif "play" in user_input.lower():
-            # Play the OpenAI Gym environment
             total_reward = 0
             state = env.reset()
             done = False
@@ -87,7 +82,8 @@ while True:
         else:
             seq2seq_input = tf.keras.preprocessing.sequence.pad_sequences([[ord(char) for char in user_input]], maxlen=50)
             seq2seq_output = seq2seq_model.predict(seq2seq_input)
-            predicted_response = " ".join([chr(np.argmax(token)) for token in seq2seq_output[0]])
+            predicted_response = " ".join([
+                chr(np.argmax(token)) for token in seq2seq_output[0]])
             
             print(f"Chatbot: {predicted_response}")
 
