@@ -1,13 +1,29 @@
+"""
+This module contains the implementation of TFCHATBOT.
+"""
+import sys
+from openai import OpenAI
 import tensorflow as tf
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 import gym
 
-"""
-This module contains the implementation of TFCHATBOT.
-"""
+client = OpenAI()
 
-# Load MNIST dataset and preprocess
+def response(client, user_input):
+    response = client.chat.completion.create(
+        model="gpt-3.5-turbo-1106",
+        messages=[
+            {"role": "system", "content": "You are an Autonmously Controlled Geth."},
+            {"role": "system", "content": "You create and Run CAGI Agents in your Env."},
+            {"role": "user", "content": user_input},
+        ],
+    )
+    predicted_response = response['choices'][0]['message']['content']
+
+    return predicted_response
+
+
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -42,38 +58,45 @@ seq2seq_model = tf.keras.Sequential([
     tf.keras.layers.Embedding(input_dim=128, output_dim=128, input_length=50),
     tf.keras.layers.LSTM(units=128, return_sequences=True),
     tf.keras.layers.LSTM(units=128),
-    tf.keras.layers.Dense(128, activation='softmax') 
+    tf.keras.layers.Dense(128, activation='softmax')
 ])
 seq2seq_model.compile(
     optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
+
+def run_chatbot(user_input):
+    predicted_response = response(client, user_input)
+
+    # Store the user input and the corresponding response in chat data
+    chat_data['inputs'].append(user_input)
+    chat_data['responses'].append(predicted_response)
+
+    return f"Chatbot: {predicted_response}"
+
 # CLI Chatbot
 while True:
-    user_input = input("You: ")
+    user_input = input("You:")
 
     if user_input.lower() == 'exit':
         print("Chatbot: Goodbye!")
         break
 
-    # Retrieve a response from stored chat data
     for idx, stored_input in enumerate(chat_data['inputs']):
         if stored_input in user_input:
             print(f"Chatbot: {chat_data['responses'][idx]}")
             break
     else:
-        # Perform actions based on user input
         if "predict" in user_input.lower():
             sample_image = np.random.rand(28, 28)  # Replace with actual image data
             prediction = model.predict(np.expand_dims(sample_image, axis=0))
             predicted_class = np.argmax(prediction)
             print(f"Chatbot: TensorFlow Model predicts the digit: {predicted_class}")
-        
         elif "train" in user_input.lower():
-            X_train_dt = np.random.rand(100, 10)  # Replace with actual training data
-            y_train_dt = np.random.randint(2, size=100)  # Replace with actual labels
+            X_train_dt = np.random.rand(100, 10)
+            y_train_dt = np.random.randint(
+                2, size=100)
             dt_model.fit(X_train_dt, y_train_dt)
             print("Chatbot: scikit-learn Decision Tree model trained.")
-        
         elif "play" in user_input.lower():
             total_reward = 0
             state = env.reset()
@@ -82,16 +105,30 @@ while True:
                 action = env.action_space.sample()  # Replace with your RL agent's action
                 state, reward, done, _, _ = env.step(action)
                 total_reward += reward
-                print(f"Chatbot: Played the game. Total reward: {total_reward}")       
-        else:
-            seq2seq_input = tf.keras.preprocessing.sequence.pad_sequences([[ord(char) for char in user_input]], maxlen=50)
-            seq2seq_output = seq2seq_model.predict(seq2seq_input)
-            predicted_response = " ".join([
-                chr(np.argmax(token)) for token in seq2seq_output[0]])
-            
-            print(f"Chatbot: {predicted_response}")
-
-            # Store the user input and the corresponding response in chat data
-            chat_data['inputs'].append(user_input)
-            chat_data['responses'].append(predicted_response)
+                print(f"Chatbot: Played the game. Total reward: {total_reward}")
+    null_response=(user_input, {None})
+    if user_input({None}):
+            print(f"Chatbot", {response}, sep=' ', end='\n', file=sys.stdout, flush=False)
+            for idx, stored_input in enumerate(chat_data['inputs']):
+                    if stored_input in user_input:
+                        print(f"Chatbot: {chat_data['responses'][idx]}")
+    elif user_input():
+                seq2seq_input = tf.keras.preprocessing.sequence.pad_sequences([
+                    [ord(char) for char in user_input]], maxlen=50)
+                seq2seq_output = seq2seq_model.predict(seq2seq_input)
+                predicted_response = " ".join([
+                    chr(np.argmax(token)) for token in seq2seq_output[0]])
+                response = client.chat.completion.create(
+                    model="gpt-3.5-turbo-1106",
+                    messages=[
+                        {"role": "system", "content": "You are an Autonoumously Controlled Geth."},
+                        {"role": "system", "content": "You create and run CAGI Agents in your Env"},
+                        {"role": "user", "content": user_input},
+                        ],
+                    )
+                predicted_response = response['choices'][0]['message']['content']
+                completion = response.parse()
+                print(client.chat.completion.create(f"Chatbot:", {response}))
+chat_data['inputs'].append(user_input)
+chat_data['responses'].append(predicted_response)
             
