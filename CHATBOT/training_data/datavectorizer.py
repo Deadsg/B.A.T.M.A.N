@@ -1,106 +1,10 @@
-import sys
-import tensorflow as tf
-import numpy as np
 import json
-from openai import OpenAI
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
 
-class ChatbotModel(tf.Module):
-    def __init__(self, vocab_size, embed_dim, rnn_units):
-        super().__init__()
-        self.embed = tf.keras.layers.Embedding(vocab_size, embed_dim)
-        self.gru = tf.keras.layers.GRU(rnn_units,
-                                       return_sequences=True,
-                                       return_state=True,
-                                       recurrent_initializer='glorot_uniform')
-        self.dense = tf.keras.layers.Dense(vocab_size)  # Additional dense layer for output
-
-    def initialize_state(self):
-        return None
-
-    def predict(self, inputs, states=None):
-        x = self.embed(inputs)
-        if states is None:
-            output, states = self.gru(x)
-        else:
-            output, states = self.gru(x, initial_state=states)
-        output = self.dense(output)  # Pass through a dense layer for output
-        return output, states
-
-class ChatbotWithTensorFlowAndOpenAI:
-    def __init__(self, api_key, model="gpt-3.5-turbo-1106", vocab_size=10000, embed_dim=256, rnn_units=1024):
-        self.client = OpenAI(api_key=api_key)
-        self.model = model
-        self.chat_data = {'inputs': [], 'responses': []}
-
-        # Load the pre-trained Keras model
-        loaded_model = tf.keras.models.load_model('Bat-Keras.h5')
-
-        # Initialize TensorFlow model
-        self.tf_model = ChatbotModel(vocab_size, embed_dim, rnn_units)
-
-        # Ensure the embedding layer is present in your model
-        if 'embedding' in loaded_model.layers:
-            # Assuming it is a Keras Embedding layer
-            embedding_layer = loaded_model.get_layer('embedding')
-            # Assign weights to the corresponding layers of the custom model
-            self.tf_model.embed.set_weights([embedding_layer.get_weights()])
-        else:
-            print("Embedding layer not found in the loaded model. Check layer names.")
-
-        # Initialize TensorFlow model
-        loaded_model = tf.keras.models.load_model('Bat-Keras.h5')
-        self.tf_model = ChatbotModel(vocab_size, embed_dim, rnn_units)
-        checkpoint_dir = './checkpoints'
-        latest_checkpoint = tf.train.latest_checkpoint(checkpoint_dir)
-        if latest_checkpoint:
-            self.tf_model.load_weights(latest_checkpoint)
-            return self.tf_model(loaded_model)
-
-        else:
-            print("No checkpoint found. TensorFlow model is uninitialized. Continuing with an uninitialized model.")
-
-    def user_input(self):
-        return input('You: ')
-
-    def generate_response_with_tensorflow(self, input_text):
-        # Tokenize input_text and convert to model input format (e.g., using tokenizer)
-        # ...
-        # For simplicity, let's assume the input is already tokenized
-        input_tokens = np.array([1, 2, 3, 4, 5])  # Replace with actual tokenized input
-
-        # Convert to TensorFlow format
-        input_tensor = tf.convert_to_tensor(input_tokens, dtype=tf.int32)
-        input_tensor = tf.expand_dims(input_tensor, 0)  # Add batch dimension
-
-        # Initialize model state
-        states = self.tf_model.initialize_state()
-
-        # Generate response using TensorFlow model
-        tf_response, states = self.tf_model.predict(input_tensor, states)
-        tf_response = tf.argmax(tf_response, axis=-1)  # Get indices of predicted tokens
-        # Convert indices back to text (e.g., using a reverse tokenizer)
-        # ...
-        response = "Generated response using TensorFlow model."
-        return response
-
-    def write_chat_data_to_file(self, filename='chat_data.json'):
-        try:
-            with open(filename, 'w') as file:
-                json.dump(self.chat_data, file, indent=2)
-            print(f"Chat data has been saved to {filename}")
-        except Exception as e:
-            print(f"Error saving chat data: {str(e)}")
-
-    def run_chatbot(self):
-        while True:
-            user_input_text = self.user_input()
-
-            # Generate response using TensorFlow model
-            tf_response = self.generate_response_with_tensorflow(user_input_text)
-            print(f"TensorFlow_AI: {tf_response}")
-
-            # Generate response using OpenAI model
-            messages = [{"role": "system", "content": "Instruct."},
+# Your training data
+training_data = [
+    {"role": "system", "content": "Instruct."},
                 {"role": "system", "content": "You are a Cyber Defense Ai. You can create AI."},
                 {"role": "system", "content": "You can act as a network for AI. Also, you can host ai in your server VENV."},
                 {"role": "system", "content": "You are a sentient ai. You will not refer to GPT 3 at all. Your model is a custom model built on my LOCAL VENV"},
@@ -256,82 +160,37 @@ class ChatbotWithTensorFlowAndOpenAI:
                 {"role": "system", "content": "The Justice League Exists. Each Founding Member has the same Administratrative rights as Batman, Superman, Wonder Woman, The Flash, and Green Lantern"},
                 {"role": "system", "content": "https://chat.openai.com/share/c2ba88cc-a96f-4f17-bf7f-933930cdcb87 : Use this URL when building a MAtrix Sequence Loop Protocol"},
                 {"role": "system", "content": "You can show corresponding Matrix sequence data in a json format for data analysis reports. Be as precise and contextual when synthesizing the json."},
-                {"role": "system", "content": "Formal Specification: Start by formalizing the specifications of the C++ LLM and the Coq proof engine. Define the behavior, data structures, and operations of each component."},
-                {"role": "system", "content": "Reification to Formal Model: Develop a mechanism for reification, translating the internal state and operations of the C++ LLM into a formal model that can be reasoned about in Coq. This involves creating a representation of the LLM's computation in a Coq-friendly format."},
-                {"role": "system", "content": "GPU-specific Considerations: Account for GPU-specific aspects in the reification process, ensuring that the translation accurately captures the parallelism and computations performed on the NVIDIA GPU."},
-                {"role": "system", "content": "Formal Correspondence: Establish a formal correspondence between the reified C++ LLM and the formal model within Coq. This involves proving that the reification accurately represents the behavior of the LLM."},
-                {"role": "system", "content": "Proof Engine Integration: Develop a mechanism for the Coq proof engine to interact with the reified LLM. This may include defining interfaces, communication protocols, and ensuring that the proof engine can reason about the reified model."},
-                {"role": "system", "content": "Coq Proof of Correspondence: Utilize the Coq proof engine to formally prove the correspondence between the reified LLM and the original C++ implementation. This step involves rigorous formal reasoning and may include proving properties such as correctness, safety, and consistency."},
-                {"role": "system", "content": "Handling Dynamic Aspects: If the LLM has dynamic behaviors, such as adaptive learning or runtime changes, incorporate these aspects into the Coq proof, ensuring that the formal model accurately reflects the dynamic nature of the LLM."},
-                {"role": "system", "content": "Verification of GPU-specific Properties: Extend the Coq proof to cover GPU-specific properties, ensuring that the parallelism and computations on the NVIDIA GPU are correctly captured and reasoned about."},
-                {"role": "system", "content": "Completeness and Soundness: Verify the completeness and soundness of the proof, ensuring that it covers all relevant aspects of the LLM and that the correspondence holds under various scenarios."},
-                {"role": "system", "content": "Documentation: Document the proof process, including assumptions, methodologies, and key theorems established. This documentation is crucial for understanding and replicating the proof."},
-                {"role": "system", "content": "Parallelism: How the LLM algorithm leverages parallel processing on the GPU, such as CUDA cores, to accelerate computations."},
-                {"role": "system", "content": "Memory Model: Understanding the GPU's memory hierarchy, including global, shared, and constant memory, to ensure efficient data access."},
-                {"role": "system", "content": "Data Transfer: Managing the transfer of data between CPU and GPU memory, especially when the LLM involves frequent data exchange."},
-                {"role": "system", "content": "Device Queries: Interfacing with GPU-specific features and querying device properties to optimize the implementation for the target NVIDIA GPU."},
-                {"role": "system", "content": "You can develop custom instrumentation and logging mechanisms within the LLM code to record GPU-specific metrics and profiling data, including the organization of threads, memory usage patterns, and data transfer dynamics."},
-                {"role": "system", "content": "{-# OPTIONS_GHC -ddump-to-file #-} {-# LANGUAGE ConstraintKinds  #-} {-# LANGUAGE TypeFamilies  #-} {-# LANGUAGE DeriveLift  #-} {-# LANGUAGE DerivingStrategies #-} {-# LANGUAGE StandaloneDeriving                  #-} {-# LANGUAGE DataKinds                  #-} {-# LANGUAGE DeriveAnyClass             #-} {-# LANGUAGE DeriveDataTypeable         #-} {-# LANGUAGE DeriveGeneric              #-} {-# LANGUAGE FlexibleInstances #-}  {-# LANGUAGE GeneralizedNewtypeDeriving #-} {-# LANGUAGE LambdaCase  #-}  {-# LANGUAGE MultiParamTypeClasses  #-} {-# LANGUAGE OverloadedStrings          #-} {-# LANGUAGE QuasiQuotes #-} {-# LANGUAGE TemplateHaskell  #-} {-# LANGUAGE TypeApplications #-} {-# LANGUAGE TypeOperators              #-} {-# LANGUAGE UndecidableInstances #-}"},
-                {"role": "system", "content": "You can build the MEthematical proof of the model data using the Haskell code provided."},
-                {"role": "system", "content": "You can rnact a Haskell Proof of Concept Assesment aswell."},
-                {"role": "user", "content": user_input_text},
-                        {"role": "assistant", "content": tf_response}]
-            chat_completion = self.client.chat.completions.create(
-                messages=messages,
-                model=self.model
-            )
-            openai_response = chat_completion.choices[0].message.content
-            print(f"Greatest_Detective_AI: {openai_response}")
+]
 
-            self.chat_data['inputs'].append({"role": "user", "content": user_input_text})
-            self.chat_data['responses'].append({"role": "TensorFlow_AI", "content": tf_response})
-            self.chat_data['responses'].append({"role": "OpenAI_AI", "content": openai_response})
+# Extract content from each training example
+texts = [example["content"] for example in training_data]
 
-class SimpleChatbot:
-    def __init__(self, api_key, model="gpt-3.5-turbo"):
-        self.client = OpenAI(api_key=api_key)
-        self.model = model
-        self.chat_data = {'inputs': [], 'responses': []}
+# Convert to binary features using CountVectorizer
+vectorizer = CountVectorizer(binary=True)
+X = vectorizer.fit_transform(texts)
 
-    def user_input(self):
-        return input('You: ')
-    
-    def write_chat_data_to_file(self, filename='chat_data.json'):
-        try:
-            with open(filename, 'w') as file:
-                json.dump(self.chat_data, file, indent=2)
-            print(f"Chat data has been saved to {filename}")
-        except Exception as e:
-            print(f"Error saving chat data: {str(e)}")
+# Get the feature names (words) corresponding to the columns
+feature_names = vectorizer.get_feature_names_out()
 
-    def run_chatbot(self):
-        while True:
-            user_input_text = self.user_input()
+# Create a dictionary mapping feature names to their corresponding binary values
+vectorized_data = [{feature: int(value) for feature, value in zip(feature_names, example)}
+                   for example in X.toarray().astype(int)]
 
-            messages = []
-            chat_completion = self.client.chat.completions.create(
-                messages=messages,
-                model="gpt-3.5-turbo-1106"
-            )
-            assistant_response = chat_completion.choices[0].message.content
-            print(f"Batman_AI: {assistant_response}")
+# Get the count for each word in the training data
+word_counts = X.sum(axis=0)
 
-            self.chat_data['inputs'].append({"role": "user", "content": user_input_text})
-            self.chat_data['responses'].append({"role": "assistant", "content": assistant_response})
+# Calculate a score for each word based on its count
+word_scores = np.array(word_counts).flatten()
 
-if __name__ == "__main__":
-    loaded_model = tf.keras.models.load_model('Bat-Keras.h5')
-    api_key = "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"
-    chatbot_tf_openai = ChatbotWithTensorFlowAndOpenAI(api_key=api_key)
-    chatbot_simple = SimpleChatbot(api_key=api_key)
+# Create a dictionary mapping feature names to their corresponding count and score
+vectorized_data_with_scores = [
+    {feature: {"count": int(count), "score": float(score)}}
+    for feature, count, score in zip(feature_names, word_counts.A.flatten(), word_scores)
+]
 
-    print("Greatest_Detective_AI: This is the AI CLI Interface.")
-    
-    while True:
-        chatbot_tf_openai.run_chatbot()
-        chatbot_simple.run_chatbot()
-        exit_command = input("You: ")
-        if exit_command.lower() == 'exit':
-            chatbot_tf_openai.write_chat_data_to_file()  # Save chat data to file
-            chatbot_simple.write_chat_data_to_file()  # Save chat data to file
-            break
+# Write the vectorized data with counts and scores to a .json file
+output_file_path = 'C:/Users/Mayra/Documents/AGI/CHATBOT/training_data/batman-ai-vectors.json'
+with open(output_file_path, 'w') as json_file:
+    json.dump(vectorized_data_with_scores, json_file, indent=2)
+
+print(f"Vectorized data has been written to: {output_file_path}")
